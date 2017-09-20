@@ -1,0 +1,403 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+div {
+    box-sizing: border-box;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    padding: 10px;
+}
+
+.img-panel,
+.label-panel {
+    height: 100%;
+}
+
+.img-panel {
+    position: relative;
+    flex: 3;
+}
+
+.label-panel {
+    flex: 1;
+    position: relative;
+    margin: 0 10px;
+    padding: 10px;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+#img-area-self,
+#img-area-other {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.placeholder {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: rgba(0, 0, 0, .5);
+    color: white;
+    font-size: 30px;
+    z-index: 999;
+}
+
+.placeholder:after {
+    display: inline-block;
+    width: 0;
+    height: 100%;
+    vertical-align: middle;
+    content: "";
+}
+
+/*label-area*/
+.label-area {
+    position: absolute;
+    transform: translate3d(0, 0, 0);
+    cursor: move;
+    z-index: 101;
+}
+
+.label-area-right {
+    position: absolute;
+    transform: translate3d(0, 0, 0);
+    z-index: 101;
+    border: 2px solid #f10000;
+}
+
+.label-area.error_1,
+.label-area.error_2 {
+    animation: errorShake .5s infinite;
+}
+
+.label-area.error_1:after,
+.label-area.error_2:after {
+    content: '未选择标签';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: red;
+    font-size: 20px;
+}
+
+.label-area.error_2:after {
+    content: '未选择二级标签';
+}
+
+@keyframes errorShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+.label-area.selected .ui-resizable-line-h {
+    transition: all .5s;
+    transform: scale(1, 3);
+}
+
+.label-area.selected .ui-resizable-line-v {
+    transition: all .5s;
+    transform: scale(3, 1);
+}
+
+.label-area:hover .remove-label {
+    display: block;
+}
+
+.ui-resizable-handle {
+    position: absolute;
+    transition: all .1s;
+    transform: translate3d(0, 0, 0);
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
+    background: red;
+    z-index: 90;
+}
+
+.ui-resizable-line-h {
+    width: 100%;
+    height: 1px;
+}
+
+.ui-resizable-line-v {
+    width: 1px;
+    height: 100%;
+}
+
+.ui-resizable-t {
+    top: 0;
+    left: 0;
+    cursor: n-resize;
+}
+
+.ui-resizable-b {
+    bottom: 0;
+    left: 0;
+    cursor: s-resize;
+}
+
+.ui-resizable-l {
+    top: 0;
+    left: 0;
+    cursor: w-resize;
+}
+
+.ui-resizable-r {
+    top: 0;
+    right: 0;
+    cursor: e-resize;
+}
+
+.ui-resizable-point {
+    width: 8px;
+    height: 8px;
+}
+
+.ui-resizable-tl {
+    top: -3px;
+    left: -3px;
+    cursor: nw-resize;
+}
+
+.ui-resizable-tr {
+    top: -3px;
+    right: -3px;
+    cursor: ne-resize;
+}
+
+.ui-resizable-bl {
+    bottom: -3px;
+    left: -3px;
+    cursor: sw-resize;
+}
+
+.ui-resizable-br {
+    bottom: -3px;
+    right: -3px;
+    cursor: se-resize;
+}
+
+.remove-label {
+    display: none;
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background: #ccc;
+    border-radius: 50%;
+}
+
+.remove-label:before,
+.remove-label:after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 14px;
+    left: 3px;
+    width: 25px;
+    height: 2px;
+    transform: rotate(45deg);
+    background: gray;
+}
+
+.remove-label:after {
+    transform: rotate(-45deg);
+}
+
+.tag-list {
+    position: absolute;
+    width: 70px;
+    top: 10px;
+    left: 15px;
+    z-index: 102;
+}
+
+.tag-list li {
+    position: relative;
+}
+
+.tag-list .tag-item {
+    display: inline-block;
+    padding: 0 2px 0 8px;
+    color: white;
+    line-height: 1.5;
+    margin: 0 0 2px 0;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.tag-item:before,
+.tag-item:after {
+    position: absolute;
+    content: " ";
+}
+
+.tag-item:before {
+    border: transparent 0.75em solid;
+    border-right-color: currentColor;
+    top: 0;
+    left: -1.5em;
+    height: 0;
+    width: 0;
+}
+
+.tag-item:after {
+    background: white;
+    width: 0.5em;
+    height: 0.5em;
+    top: 0.5em;
+    left: -0.125em;
+    border-radius: 0.25em;
+}
+
+.tag-item.tag_2 {
+    background: rgba(0, 0, 0, .5);
+}
+
+.label-group {
+    position: relative;
+}
+
+.second-tag-panel {
+    display: none;
+    position: absolute;
+    top: -15px;
+    left: 0;
+    transition: all .3s;
+    transform: translate3d(120px, 0, 0);
+    background: #f8f8f8;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.second-tag-panel:before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: -1.5em;
+    display: block;
+    border: transparent 0.75em solid;
+    border-right-color: #f8f8f8;
+    height: 0;
+    width: 0;
+}
+
+.second-tag-panel.show {
+    display: block;
+}
+
+.label-list label {
+    display: inline-block;
+    width: 70px;
+}
+
+.label-summary {
+    margin-top: 20px;
+    font-size: 25px;
+}
+
+.label-diff {
+    margin-top: 20px;
+    font-size: 25px;
+    text-align: center;
+    color: #f10000;
+}
+
+.color-block {
+    margin-left: 10px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+}
+
+/*button*/
+.btn-group {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 20px;
+    display: flex;
+}
+
+.btn-0,
+.btn-0:before,
+.btn-0:after {
+    box-sizing: border-box;
+    -webkit-transition: all 0.5s;
+    transition: all 0.5s;
+    z-index: -1;
+}
+
+.btn-0 {
+    flex: 1;
+    display: block;
+    position: relative;
+    margin: 20px 5px;
+    width: 100%;
+    height: 80px;
+    line-height: 80px;
+    max-width: 250px;
+    color: black;
+    text-align: center;
+    background: transparent;
+    text-transform: uppercase;
+    overflow: hidden;
+    border: 1px solid currentColor;
+    z-index: 9;
+}
+
+.btn-0 {
+    color: #9a3789;
+}
+
+.btn-0:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #520c46;
+}
+
+.btn-0:hover {
+    color: #e1c4dc;
+}
+
+.btn-0:hover:before {
+    width: 100%;
+}
+
+.btn-0:active {
+    background: #881474;
+}
