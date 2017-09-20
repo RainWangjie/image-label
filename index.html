@@ -1,10 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>$Title$</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>图片标注</title>
+    <link type="text/css" rel="stylesheet" href="main.css">
 </head>
 <body>
-$END$
+<div id="app">
+    <div class="img-panel">
+        <div id="img-area-self">
+            <img id="img-self" draggable="false">
+        </div>
+    </div>
+    <div class="label-panel">
+        <div class="label-group">
+            <ul class="second-tag-panel">
+
+            </ul>
+        </div>
+        <ul class="label-summary">
+            <li class="label-count">已打标签：<span></span></li>
+            <li class="label-diff-count">标签diff：<span></span></li>
+            <li class="label-ok-count">标签ok：<span></span></li>
+            <li class="label-need-count">待打标签：<span></span></li>
+        </ul>
+        <div class="btn-group">
+            <button id="skip" class="btn-0">不需要标注</button>
+            <button id="next-picture" class="btn-0" data-type="label">保存、获取下一张</button>
+        </div>
+    </div>
+    <div class="placeholder"></div>
+</div>
+<script type="text/html" id="tpl-area">
+    <div class="label-area">
+        <div class="ui-resizable-handle ui-resizable-line-h ui-resizable-t" data-resize="t"></div>
+        <div class="ui-resizable-handle ui-resizable-line-v ui-resizable-l" data-resize="l"></div>
+        <div class="ui-resizable-handle ui-resizable-line-h ui-resizable-b" data-resize="b"></div>
+        <div class="ui-resizable-handle ui-resizable-line-v ui-resizable-r" data-resize="r"></div>
+        <div class="ui-resizable-handle ui-resizable-point ui-resizable-tl" data-resize="tl"></div>
+        <div class="ui-resizable-handle ui-resizable-point ui-resizable-tr" data-resize="tr"></div>
+        <div class="ui-resizable-handle ui-resizable-point ui-resizable-bl" data-resize="bl"></div>
+        <div class="ui-resizable-handle ui-resizable-point ui-resizable-br" data-resize="br"></div>
+        <ul class="tag-list"></ul>
+        <span class="remove-label"></span>
+    </div>
+</script>
+<script src="../../js/jquery.min.js"></script>
+<script src="http://rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
+<script src="mouse.js"></script>
+<script src="main.js"></script>
+<script>
+    getImage();
+</script>
 </body>
 </html>
