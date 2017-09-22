@@ -298,7 +298,7 @@ $(document).bind('contextmenu', function (e) {
 });
 
 function moveLabelMouseDown(event) {
-    if (event.which == 3) {//右击删除
+    if (event.which === 3) {//右击删除
         if (confirm('删除该标注?')) {
             var id = $(this).attr('id').replace('label_', '');
             $(this).remove();
