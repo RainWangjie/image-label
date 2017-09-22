@@ -16,6 +16,8 @@ function getRandomColor() {
             w width,
             h height
             el DOM标注框,
+            color 标注框颜色,
+            tag 标签内容
             isExist 是否绘制,
  */
 
@@ -206,16 +208,19 @@ function newLabelMouseDown(event) {
     selected = labelTotal;
 
 
-    var newLabel = {
-        x: mouse.x,
-        y: mouse.y,
-        el: $($('#tpl-area').html()),
-        isExist: false,
-        w: 0,
-        h: 0
-    };
+    var color = getRandomColor(),
+        newLabel = {
+            x: mouse.x,
+            y: mouse.y,
+            el: $($('#tpl-area').html()),
+            isExist: false,
+            color: color,
+            w: 0,
+            h: 0
+        };
 
     newLabel.el.attr('id', 'label_' + selected);
+    newLabel.el.find('.ui-resizable-handle').css('background', color);
 
     // 记录当前鼠标pos
     labelMove = {
@@ -305,6 +310,7 @@ function moveLabelMouseDown(event) {
         isMouseDown = true;
         mouseType = 2;
         selected = $(this).attr('id').replace('label_', '');
+        $labelTag.val(labelList[selected].tag);
         labelMove = {
             x: mouse.x,
             y: mouse.y
@@ -446,6 +452,20 @@ $('body').on('click', '.remove-label', function () {
     }
     return false;
 });
+
+/*
+ * 输入框事件
+ */
+$('#check-tag').on('click', function () {
+    var tag = $labelTag.val();
+    labelList[selected].tag = tag;
+    $('#label_' + selected).find('.tag-list').eq(0).html(drawTag(labelList[selected].color, tag));
+});
+
+// 绘制标签
+function drawTag(color, tag) {
+    return '<li class="tag-item" style="background:' + color + '">' + tag + '</li>';
+}
 
 // 处理宽高比例
 function dealWH(type, num) {
