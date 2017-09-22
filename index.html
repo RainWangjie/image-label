@@ -6,34 +6,26 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>图片标注</title>
-    <link type="text/css" rel="stylesheet" href="main.css">
+    <link type="text/css" rel="stylesheet" href="src/main.css">
 </head>
 <body>
 <div id="app">
     <div class="img-panel">
         <div id="img-area-self">
-            <img id="img-self" draggable="false">
+            <img id="img-self" draggable="false"/>
         </div>
     </div>
     <div class="label-panel">
         <div class="label-group">
-            <ul class="second-tag-panel">
-
-            </ul>
+           <input type="text" placeholder="输入标签" id="label-tag"/>
         </div>
-        <ul class="label-summary">
-            <li class="label-count">已打标签：<span></span></li>
-            <li class="label-diff-count">标签diff：<span></span></li>
-            <li class="label-ok-count">标签ok：<span></span></li>
-            <li class="label-need-count">待打标签：<span></span></li>
-        </ul>
         <div class="btn-group">
-            <button id="skip" class="btn-0">不需要标注</button>
             <button id="next-picture" class="btn-0" data-type="label">保存、获取下一张</button>
         </div>
     </div>
     <div class="placeholder"></div>
 </div>
+<!--标注框结构-->
 <script type="text/html" id="tpl-area">
     <div class="label-area">
         <div class="ui-resizable-handle ui-resizable-line-h ui-resizable-t" data-resize="t"></div>
@@ -48,12 +40,9 @@
         <span class="remove-label"></span>
     </div>
 </script>
-<script src="../../js/jquery.min.js"></script>
-<script src="http://rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
-<script src="mouse.js"></script>
-<script src="main.js"></script>
-<script>
-    getImage();
-</script>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/stats.js/r17/Stats.min.js"></script>
+<script src="src/mouse.js"></script>
+<script src="src/main.js"></script>
 </body>
 </html>
