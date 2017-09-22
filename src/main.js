@@ -1,11 +1,6 @@
 /**
- * Created by gewangjie on 2017/9/20
- */
-/**
  * Created by gewangjie on 2017/1/18.
  */
-// jq与原生js混写，需移除jq
-// 随机生成颜色
 function getRandomColor() {
     return '#' +
         (function (color) {
@@ -13,14 +8,19 @@ function getRandomColor() {
             && (color.length == 6) ? color : arguments.callee(color);
         })('');
 }
+
 /*
- label：标注（框选）
- tag：框选对应标签
- tag_2:属性
+ * label：标注（框选）
+ *  @params x pos.x,
+            y pos.y,
+            w width,
+            h height
+            el DOM标注框,
+            isExist 是否绘制,
  */
 
-var _domain = 'https://test.teegether.cn',
-    imgAreaEl = $('#img-area-self'),//图片放置元素
+var $imgAreaEl = $('#img-area-self'),//图片放置元素
+    $labelTag = $('#label-tag'), // 图片标签
     isMouseDown = false,//鼠标点击动作
     mouseType = 0,//鼠标操作内容，1：创建，2：移动，3：缩放
     mouse = {},//mouse属性(x,y)
@@ -31,10 +31,12 @@ var _domain = 'https://test.teegether.cn',
     labelMove = {},//记录标注初始坐标等相关参数(x,y,resize)
     labelTotal = 0,//标注总数
     tagData = [],//标签数据name,color
-    winScale = imgAreaEl.width() / imgAreaEl.height(),//图片放置区域比例
-    labelId = '',//当前图片链接
+    winScale = $imgAreaEl.width() / $imgAreaEl.height(),//图片放置区域比例
     labelIdFinish = [],
-    diffText = ['', '标注数量不同', '标注标签不同', '标注属性不同', '标注位置不同'];
+    exampleImg = {
+        pic: 'https://deepfashion.oss-cn-hangzhou.aliyuncs.com/t51.2885-15/e35/21879601_111660179580865_8819917785619496960_n.jpg'
+    };
+
 // 全局提示框
 var _placeHolderEl = {
     el: $('.placeholder'),
@@ -53,61 +55,15 @@ var _placeHolderEl = {
     }
 };
 
-var tagName = {
-        '上衣': {
-            detail: ['衬衫', '上衣', 'T恤', '西服', '夹克', '卫衣', '针织衫', '大衣', '棉衣', '风衣'],
-            tag_2_type: 1
-        },
-        '裙子': {
-            detail: ['连衣裙', '半身裙'],
-            tag_2_type: 2
-        },
-        '裤子': {
-            detail: ['裤装'],
-            tag_2_type: 3
-        },
-        '鞋': {
-            detail: ['鞋子']
-        },
-        '包': {
-            detail: ['包']
-        }
-    },
-    tagTotal = 0;
-var tag_2 = {
-    1: ['长袖', '短袖', '无袖', '吊带'],
-    3: ['长裤', '中裤', '短裤'],
-    2: ['长裙', '中裙', '短裙']
-};
-initTag('.label-group');
+getImage();
+
 // 获取图片
 function getImage() {
     _placeHolderEl.setText('新图片加载中......');
-    $.ajax({
-        url: _domain + '/deep_fashion/ins_label/img',
-        type: 'GET',
-        success: function (d) {
-            d = JSON.parse(d);
-            if (d.status.code == '1000') {
-                clearAll();
-                if (d.result.pic !== undefined) {
-                    adaptionImg(d.result.pic, $('#img-self'));
-                    labelId = d.result.labelId;
-                } else {
-                    _placeHolderEl.setHide('没有图片了');
-                }
-                editLabelSummary(d.result.summary);
-            } else {
-                alert(d.message);
-            }
-        },
-        error: function (d) {
-            alert('网络错误')
-        }
-    });
-    //重置标签
-    linkage();
+
+    adaptionImg(exampleImg.pic, $('#img-self'));
 }
+
 // 获取差异图片
 function getDiffImage() {
     _placeHolderEl.setText('新图片加载中......');
@@ -133,6 +89,7 @@ function getDiffImage() {
         }
     });
 }
+
 // 获取裁决图片
 function getFinalDiffImg() {
     _placeHolderEl.setText('新图片加载中......');
@@ -166,6 +123,7 @@ function getFinalDiffImg() {
         }
     });
 }
+
 // 图片自适应
 function adaptionImg(url, el, callback) {
     url += '?x-oss-process=image/resize,w_500';
@@ -195,53 +153,10 @@ function adaptionImg(url, el, callback) {
     };
     img.src = url;
 }
-// 初始化标签
-function initTag(el) {
-    for (var i in tagName) {
-        var html = '<ul class="label-list">';
-        for (var j in tagName[i].detail) {
-            var name = tagName[i].detail[j];
-            var color = getRandomColor();
-            tagData.push({
-                'name': name,
-                'color': color,
-                'tag_2_type': tagName[i].tag_2_type || -1
-            });
-            //最好class控制color
-            html += '<li>' +
-                '<label><input type="radio" class="imgTag tag_' + tagTotal + '" name="imgTag" value="' + tagTotal + '">' + name +
-                '</label><div class="color-block" style="background: ' + color + '"></div>' +
-                '</li>';
-            tagTotal++;
-        }
-        html += "</ul>";
-        $(el).append(html);
-    }
-    $('.imgTag').on('change', changeTag);
-    print('列表初始化');
-    // 绑定鼠标事件
-    bindNewLabel();
-}
-// 初始化二级标签
-function initSecondTag(tag, y) {//根据一级标签对应二级标签类型渲染列表，y为panel移动距离
-    if (tag != -1) {//二级标签为空则移除
-        var html = '';
-        for (var i in tag_2[tag]) {
-            html += '<li>' +
-                '<label><input type="radio" class="imgTag_2 tag_2_' + i + '" name="imgSecondTag" value="' + i + '">' + tag_2[tag][i] +
-                '</label></li>';
-        }
-        $('.second-tag-panel').html(html).addClass('show').css({
-            'transform': 'translate3d(120px,' + y + 'px,0)',
-            '-webkit-transform': 'translate3d(120px,' + y + 'px,0)'
-        });
-        // 二级标签已选择则模拟点击
-        labelList[selected].tag_2 != -1 && $('.imgTag_2').eq(labelList[selected].tag_2).click();
-    } else {
-        $('.second-tag-panel').removeClass('show');
-    }
-    drawTagList();
-}
+
+// 绑定鼠标事件
+bindNewLabel();
+
 // 初始化移动
 function initOperate() {
     operateData.y = labelList[selected].y;
@@ -249,13 +164,14 @@ function initOperate() {
     operateData.w = labelList[selected].w;
     operateData.h = labelList[selected].h;
 }
+
 // 清除
 function clearLabel() {
     labelMove = {};
 }
+
 function clearAll() {
     clearLabel();
-    labelId = '';
     selected = 0;
     labelList = [];
     labelTotal = 0;
@@ -263,24 +179,33 @@ function clearAll() {
     $('.label-area-right').remove();
     // $('#img-self').attr('src', '')
 }
+
 // 创建label
 function bindNewLabel() {
     // move绑定到父元素
     $('#img-area-self').on('mousedown', newLabelMouseDown)
         .on('mousemove', move)
-        .on('mouseup', up);
+        .on('mouseup', up)
+        .on('mousedown', '.ui-resizable-handle', scaleLabelMouseDown)
+        .on('mousedown', '.label-area', moveLabelMouseDown);
 }
+
+// 解绑鼠标事件
 function unbindEvent() {
     $('#img-area-self').unbind('mousedown', newLabelMouseDown)
         .unbind('mousemove', move)
         .unbind('mouseup', up);
 }
+
 function newLabelMouseDown(event) {
     mouse = captureMouse(event);
     isMouseDown = true;
     mouseType = 1;
+
     tempSelected = selected;
     selected = labelTotal;
+
+
     var newLabel = {
         x: mouse.x,
         y: mouse.y,
@@ -289,17 +214,24 @@ function newLabelMouseDown(event) {
         w: 0,
         h: 0
     };
+
     newLabel.el.attr('id', 'label_' + selected);
+
+    // 记录当前鼠标pos
     labelMove = {
         x: mouse.x,
         y: mouse.y
     };
+
     labelList.push(newLabel);
     labelTotal++;
-    print('创建标注开始');
+
+    console.log('创建标注开始');
+
     animate();
     return false;
 }
+
 function newLabelMouseMove() {
     var difference_x = mouse.x - labelMove.x,
         difference_y = mouse.y - labelMove.y;
@@ -341,26 +273,25 @@ function newLabelMouseMove() {
         labelList[selected].isExist = true;
     }
 }
+
 function newLabelMouseup() {
-    if (labelList[selected].isExist) {
-        print('创建标注' + (labelTotal - 1));
-        bindMoveLabel();
-        bindScaleLabel();
-    } else {
+    if (!labelList[selected].isExist) {
         labelList.pop();
         labelTotal--;
         selected = tempSelected;
-        print('创建标注失败or撤销');
+        console.log('创建标注失败or撤销');
         return;
     }
+
+    // 绑定标注框鼠标事件
+    console.log('创建标注' + (labelTotal - 1));
 }
+
 // 移动area
-function bindMoveLabel() {
-    $('.label-area').on('mousedown', moveLabelMouseDown);
-}
 $(document).bind('contextmenu', function (e) {
     return false; //屏蔽菜单
 });
+
 function moveLabelMouseDown(event) {
     if (event.which == 3) {//右击删除
         if (confirm('删除该标注?')) {
@@ -379,22 +310,22 @@ function moveLabelMouseDown(event) {
             y: mouse.y
         };
         initOperate();
-        print('移动标注_' + selected);
+        console.log('移动标注_' + selected);
         animate();
     }
     return false;
 }
+
 function moveLabelMouseMove() {
     operateData.y = labelList[selected].y + mouse.y - labelMove.y;
     operateData.x = labelList[selected].x + mouse.x - labelMove.x;
 }
+
 function moveLabelMouseup() {
-    print('移动结束并选中标注_' + selected);
+    console.log('移动结束并选中标注_' + selected);
 }
+
 // 缩放area
-function bindScaleLabel() {
-    $('.ui-resizable-handle').on('mousedown', scaleLabelMouseDown);
-}
 function scaleLabelMouseDown(event) {
     mouse = captureMouse(event);
     isMouseDown = true;
@@ -406,10 +337,11 @@ function scaleLabelMouseDown(event) {
         y: mouse.y
     };
     initOperate();
-    print('缩放start' + selected);
+    console.log('缩放start' + selected);
     animate();
     return false;
 }
+
 function scaleLabelMouseMove() {
     switch (labelMove.resize) {
         case 't':
@@ -448,27 +380,33 @@ function scaleLabelMouseMove() {
             break;
     }
 }
+
 function scaleLabelMouseup() {
-    print('缩放结束并选中标注_' + selected);
+    console.log('缩放结束并选中标注_' + selected);
 }
-// 公共方法
+
+// 公共方法，根据MouseDown事件发生Node区分操作
 function move(event) {
-    if (isMouseDown) {
-        mouse = captureMouse(event);
-        switch (mouseType) {
-            case 1:
-                newLabelMouseMove();
-                break;
-            case 2:
-                moveLabelMouseMove();
-                break;
-            case 3:
-                scaleLabelMouseMove();
-                break;
-        }
+    if (!isMouseDown) {
+        return false;
     }
+
+    mouse = captureMouse(event);
+    switch (mouseType) {
+        case 1:
+            newLabelMouseMove();
+            break;
+        case 2:
+            moveLabelMouseMove();
+            break;
+        case 3:
+            scaleLabelMouseMove();
+            break;
+    }
+
     return false;
 }
+
 function up() {
     if (isMouseDown) {
         switch (mouseType) {
@@ -488,7 +426,6 @@ function up() {
             labelList[selected].w = _max(operateData.w);
             labelList[selected].h = _max(operateData.h);
             clearLabel();
-            linkage();
             //操作label添加selected
             $('.label-area').removeClass('selected');
             $('#label_' + selected).addClass('selected');
@@ -499,9 +436,7 @@ function up() {
     mouseType = 0;
     return false;
 }
-function print(txt) {
-    console.log(txt)
-}
+
 // 删除标注
 $('body').on('click', '.remove-label', function () {
     if (confirm('删除该标注?')) {
@@ -511,210 +446,7 @@ $('body').on('click', '.remove-label', function () {
     }
     return false;
 });
-// 修改标签
-function changeTag() {
-    var value = $('.imgTag:checked').val();
-    // 一级标签被修改，二级标签重置
-    labelList[selected].tag != value && (labelList[selected].tag_2 = -1);
-    labelList[selected].tag = value;
-    initSecondTag(tagData[value].tag_2_type, this.offsetTop);
-}
-function drawTagList() {
-    var el = $('#label_' + selected + ' .tag-list'),
-        _tag = labelList[selected].tag,//一级标签索引
-        _tag_name = tagData[_tag].name,
-        _tag_2 = labelList[selected].tag_2,//二级标签索引
-        _tag_2_type = tagData[_tag].tag_2_type,//一级标签对应二级标签类型
-        _tag_2_name = _tag_2 != -1 ? tag_2[_tag_2_type][_tag_2] : '';
-    el.html(drawTag(tagData[_tag].color, _tag_name)).append(drawTag_2(_tag_2_name));
-    el.siblings(".ui-resizable-handle").css('background', tagData[_tag].color);
-}
-// 绘制标签
-function drawTag(color, tag) {
-    return '<li class="tag-item" style="background:' + color + '">' + tag + '</li>';
-}
-// 绘制属性
-function drawTag_2(tag_2) {
-    return tag_2 ? '<li class="tag-item tag_2">' + tag_2 + '</li>' : '';
-}
-// tag,radio联动
-function linkage() {
-    if (labelList[selected].tag) {
-        $('.imgTag').eq(labelList[selected].tag).click();
-    } else {
-        $('.imgTag').each(function () {
-            $(this).removeAttr('checked');
-        });
-        $('.second-tag-panel').removeClass('show');
-    }
-}
-// 根据标签与属性返回对应索引
-function returnTagIndex(_tag_name, _tag_2_name) {
-    var _tag_index, _tag_2_type, _tag_2_index;
-    for (var i in tagData) {
-        if (tagData[i].name === _tag_name) {
-            _tag_index = i;
-            _tag_2_type = tagData[i].tag_2_type;
-            break;
-        }
-    }
-    if (_tag_2_type !== -1) {
-        for (var j in tag_2[_tag_2_type]) {
-            if (tag_2[_tag_2_type][j] === _tag_2_name) {
-                _tag_2_index = j;
-                break;
-            }
-        }
-    } else {
-        _tag_2_index = -1;
-    }
 
-    return {
-        tag_index: _tag_index,
-        tag_2_index: _tag_2_index
-    }
-}
-// 二级标签点击
-$('.second-tag-panel').on('change', 'input', function () {
-    labelList[selected].tag_2 = $(this).val();
-    drawTagList();
-});
-// 获取新图
-$('#next-picture').click(function () {
-    if (!labelId) {
-        _placeHolderEl.setHide('异常错误，请刷新后重新打标');
-        return;
-    }
-    _placeHolderEl.setText('数据打包......');
-    var _type = $(this).data('type'),
-        labelDetail = [],
-        isError = false,
-        consoleTable = [['TOP', 'LEFT', 'WIDTH', 'HEIGHT', '标签']],//控制台打印表格数据
-        isExist = labelList.every(function (item) { //是否有标签
-            return item.isExist == false;
-        });
-
-    if (isExist && _type == 'label') {
-        getImage();
-        return;
-    }
-    for (var i in labelList) {
-        var label = labelList[i];
-        if (label.isExist) {
-            var tagName = isTagRight(label.tag, label.tag_2);
-            if (typeof tagName === 'object') {
-                consoleTable.push([dealWH('h', label.y), dealWH('w', label.x), dealWH('w', label.w), dealWH('h', label.h), tagName]);
-                labelDetail.push({
-                    'tag': tagName.tag,
-                    'property': [tagName.tag_2 || ''],
-                    'pos': [dealWH('h', label.y), dealWH('w', label.x), dealWH('w', label.w), dealWH('h', label.h)]
-                })
-            } else {
-                consoleTable.push([dealWH('h', label.y), dealWH('w', label.x), dealWH('w', label.w), dealWH('h', label.h), '空']);
-                label.el.addClass(tagName);
-                _placeHolderEl.hide();
-                setTimeout(function () {
-                    $('.label-area').removeClass('error_1').removeClass('error_2');
-                }, 1000);
-                isError = true;
-            }
-        }
-    }
-    console.table(consoleTable);
-    if (!isError) {
-        var postData = {
-            'labelId': labelId,
-            'labelDetail': JSON.stringify(labelDetail)
-        };
-        // 提交数据
-        _placeHolderEl.setText('数据上传......');
-        if (_type == 'label') {
-            $.ajax({
-                url: _domain + '/deep_fashion/ins_label/labels',
-                type: 'POST',
-                data: postData,
-                success: function (d) {
-                    d = JSON.parse(d);
-                    if (d.status.code == '1000') {
-                        getImage();
-                    } else {
-                        alert(d.message);
-                    }
-                    _placeHolderEl.hide();
-                },
-                error: function (d) {
-                    _placeHolderEl.hide();
-                    alert('网络错误')
-                }
-            });
-        } else {
-            $.ajax({
-                url: _domain + '/deep_fashion/ins_label/diff',
-                type: 'POST',
-                data: postData,
-                success: function (d) {
-                    d = JSON.parse(d);
-                    if (d.status.code == '1000') {
-                        getDiffImage();
-                    } else {
-                        alert(d.message);
-                    }
-                    _placeHolderEl.hide();
-                },
-                error: function (d) {
-                    _placeHolderEl.hide();
-                    alert('网络错误')
-                }
-            });
-        }
-    }
-});
-// 不需要标注按钮
-$('#skip').click(function () {
-    $.ajax({
-        url: _domain + '/deep_fashion/ins_label/nolabel',
-        type: 'POST',
-        data: {labelId: labelId},
-        success: function (d) {
-            d = JSON.parse(d);
-            if (d.status.code == '1000') {
-                getImage();
-            } else {
-                alert(d.message);
-            }
-            _placeHolderEl.hide();
-        },
-        error: function (d) {
-            _placeHolderEl.hide();
-            alert('网络错误')
-        }
-    });
-});
-
-// 修改标签统计文案
-function editLabelSummary(data) {
-    $('.label-count span').html(data.labelCount);
-    $('.label-diff-count span').html(data.labelDiffCount);
-    $('.label-ok-count span').html(data.labelOkCount);
-    $('.label-need-count span').html(data.needLabelCount);
-}
-// 处理标签,一、二级标签是否选择
-function isTagRight(_tag, _tag_2) {
-    if (!_tag) {
-        return 'error_1';
-    }
-    var _tag_name = tagData[_tag].name,
-        _tag_2_type = tagData[_tag].tag_2_type,//一级标签对应二级标签类型
-        _tag_2_name = _tag_2 != -1 ? tag_2[_tag_2_type][_tag_2] : '';
-    if (_tag_2_type != -1 && _tag_2 == -1) {
-        return 'error_2'
-    } else {
-        return {
-            tag: _tag_name,
-            tag_2: _tag_2_name
-        }
-    }
-}
 // 处理宽高比例
 function dealWH(type, num) {
     var t = $('#img-self'),
@@ -726,15 +458,17 @@ function dealWH(type, num) {
         return (num / h).toFixed(4);
     }
 }
+
 // 帧率显示
-// var stats = new Stats();
-// stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-// stats.dom.style.cssText = 'position:fixed;top:0;right:0;cursor:pointer;opacity:0.9;z-index:10000';
-// document.body.appendChild(stats.dom);
+var stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+stats.dom.style.cssText = 'position:fixed;top:0;right:0;cursor:pointer;opacity:0.9;z-index:10000';
+document.body.appendChild(stats.dom);
+
 // 按浏览器刷新率渲染标注
 function animate() {
-    // stats.begin();
-    // stats.end();
+    stats.begin();
+    stats.end();
     isMouseDown && window.requestAnimationFrame(animate);
     if (labelTotal > 0 && labelList[selected] && labelList[selected].isExist) {
         operateData.w = _max(operateData.w);
@@ -747,6 +481,7 @@ function animate() {
         })
     }
 }
+
 // 根据数据还原框选
 function restore(data) {
     restoreLeft(data);
@@ -754,6 +489,7 @@ function restore(data) {
     // 差异信息显示
     $('.label-diff').html(diffText[data.diffType] + '<br/>' + data.diffDesc);
 }
+
 function restoreLeft(data, el) {
     var t = el ? $(el) : $('#img-self');
     adaptionImg(data.pic, t, function () {
@@ -801,6 +537,7 @@ function restoreLeft(data, el) {
         up();
     });
 }
+
 function restoreRight(data, el) {
     var t = el ? $(el) : $('#img-other');
     adaptionImg(data.pic, t, function () {
@@ -825,6 +562,7 @@ function restoreRight(data, el) {
         }
     });
 }
+
 //取最小值
 function _max(num) {
     return Math.max(20, num);
