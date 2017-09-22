@@ -6,7 +6,7 @@ html, body {
     overflow: hidden;
 }
 
-*{
+* {
     box-sizing: border-box;
 }
 
@@ -30,16 +30,15 @@ ul {
 
 .img-panel {
     position: relative;
-    flex: 3;
+    flex: 1;
 }
 
 .label-panel {
-    flex: 1;
     position: relative;
+    width: 150px;
     margin: 0 10px;
     padding: 10px;
     border-left: 1px solid #000;
-    border-right: 1px solid #000;
 }
 
 #img-area-self,
