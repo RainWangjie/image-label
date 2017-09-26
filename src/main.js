@@ -66,66 +66,6 @@ function getImage() {
     adaptionImg(exampleImg.pic, $('#img-self'));
 }
 
-// 获取差异图片
-function getDiffImage() {
-    _placeHolderEl.setText('新图片加载中......');
-    $.ajax({
-        url: _domain + '/deep_fashion/ins_label/diffImg',
-        type: 'GET',
-        success: function (d) {
-            d = JSON.parse(d);
-            if (d.status.code == '1000') {
-                clearAll();
-                if (d.result !== undefined) {
-                    restore(d.result);
-                    labelId = d.result.labelId;
-                } else {
-                    _placeHolderEl.setHide('没有图片了');
-                }
-            } else {
-                alert(d.message);
-            }
-        },
-        error: function (d) {
-            alert('网络错误')
-        }
-    });
-}
-
-// 获取裁决图片
-function getFinalDiffImg() {
-    _placeHolderEl.setText('新图片加载中......');
-    $.ajax({
-        url: _domain + '/deep_fashion/ins_label/finalDiffImg',
-        type: 'GET',
-        success: function (d) {
-            d = JSON.parse(d);
-            if (d.status.code == '1000') {
-                clearAll();
-                if (d.result !== undefined) {
-                    restoreRight({
-                        pic: d.result.pic,
-                        diffLabel: d.result.left.labelDetail
-                    }, '#img-self');
-                    restoreRight({
-                        pic: d.result.pic,
-                        diffLabel: d.result.right.labelDetail
-                    }, '#img-other');
-                    labelIdFinish = [d.result.left.labelId, d.result.right.labelId];
-                    $('.finish-total span').html(d.result.total);
-                } else {
-                    _placeHolderEl.setHide('没有图片了');
-                }
-            } else {
-                alert(d.message);
-            }
-        },
-        error: function (d) {
-            alert('网络错误')
-        }
-    });
-}
-
 // 图片自适应
 function adaptionImg(url, el, callback) {
     url += '?x-oss-process=image/resize,w_500';
@@ -186,10 +126,10 @@ function clearAll() {
 function bindNewLabel() {
     // move绑定到父元素
     $('#img-area-self').on('mousedown', newLabelMouseDown)
-        .on('mousemove', move)
-        .on('mouseup', up)
         .on('mousedown', '.ui-resizable-handle', scaleLabelMouseDown)
-        .on('mousedown', '.label-area', moveLabelMouseDown);
+        .on('mousedown', '.label-area', moveLabelMouseDown)
+        .on('mousemove', move)
+        .on('mouseup', up);
 }
 
 // 解绑鼠标事件
@@ -207,7 +147,7 @@ function newLabelMouseDown(event) {
     tempSelected = selected;
     selected = labelTotal;
 
-
+    // 为每个标注分配颜色
     var color = getRandomColor(),
         newLabel = {
             x: mouse.x,
