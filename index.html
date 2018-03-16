@@ -6,46 +6,22 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>图片标注</title>
-    <link type="text/css" rel="stylesheet" href="src/main.css">
 </head>
 <body>
 <div id="app">
     <!--操作区域-->
     <div class="img-panel">
         <div id="img-area-self">
-            <img id="img-self" draggable="false"/>
+
         </div>
     </div>
     <!--编辑区域-->
     <div class="label-panel">
-        <div class="label-group">
-           <input type="text" placeholder="输入标签" id="label-tag"/>
-            <button id="check-tag">check</button>
-        </div>
-        <div class="btn-group">
-            <button id="next-picture" class="btn-0" data-type="label">保存、获取下一张</button>
-        </div>
+        <input placeholder="请输入标签" type="text" id="label-text"/>
+        <button id="check">check</button>
     </div>
-    <div class="placeholder"></div>
 </div>
-<!--标注框结构-->
-<script type="text/html" id="tpl-area">
-    <div class="label-area">
-        <div class="ui-resizable-handle ui-resizable-line-h ui-resizable-t" data-resize="t"></div>
-        <div class="ui-resizable-handle ui-resizable-line-v ui-resizable-l" data-resize="l"></div>
-        <div class="ui-resizable-handle ui-resizable-line-h ui-resizable-b" data-resize="b"></div>
-        <div class="ui-resizable-handle ui-resizable-line-v ui-resizable-r" data-resize="r"></div>
-        <div class="ui-resizable-handle ui-resizable-point ui-resizable-tl" data-resize="tl"></div>
-        <div class="ui-resizable-handle ui-resizable-point ui-resizable-tr" data-resize="tr"></div>
-        <div class="ui-resizable-handle ui-resizable-point ui-resizable-bl" data-resize="bl"></div>
-        <div class="ui-resizable-handle ui-resizable-point ui-resizable-br" data-resize="br"></div>
-        <ul class="tag-list"></ul>
-        <span class="remove-label"></span>
-    </div>
-</script>
 <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://cdn.bootcss.com/stats.js/r17/Stats.min.js"></script>
-<script src="src/mouse.js"></script>
 <script src="src/main.js"></script>
 </body>
 </html>

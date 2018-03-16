@@ -5,10 +5,10 @@
 // 在utils对象上定义捕获坐标的方法
 // 鼠标事件
 function captureMouse(event) {
-    var element = document.getElementById('img-self');
+    const element = document.getElementById('img-self');
     //定义一个名为mouse的对象
-    var mouse = {x: 0, y: 0};
-    var x, y;
+    let mouse = {x: 0, y: 0};
+    let x, y;
 
     //获取鼠标位于当前屏幕的位置， 并作兼容处理
     if (event.pageX || event.pageY) {
@@ -50,3 +50,5 @@ if (!window.cancelAnimationFrame) {
         window.oCancelAnimationFrame || window.oCancelRequestAnimationFrame ||
         window.clearTimeout);
 }
+
+export {captureMouse}

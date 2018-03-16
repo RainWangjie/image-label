@@ -2,6 +2,8 @@
 /bower_components
 /.vscode
 /node_modules
+/build
+/.cache
 web.config
 ####################################
 ######## OS generated files ########
